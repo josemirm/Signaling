@@ -4,8 +4,8 @@ Small C++11 library to handle signals between object in an asynchronous and port
 It executes some code asynchronously every time a signal is received. The utility here is communicate objects in a simple way, only having to run a method of the Signal object.
 
 ## How to use it
-Create a Signal object for every signal you want to handle. For example:
-`Signal sigStart, sigStep, sigStop;`
+Create a Signal object for every signal you want to handle.
+For example: `Signal sigStart, sigStep, sigStop;`
 
 Then, assign them code using the `ConfigSignal` macro:
 ```c++
