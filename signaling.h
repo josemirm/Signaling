@@ -15,89 +15,33 @@
 
 using namespace std;
 
-#define SignalRoutine(code) (thread([this] { \
-while (s.waitToTrigger()) { \
-	code \
-}})) \
-
 #define ConfigSignal(signal, code) signal.setSignal(thread([this] { \
 while (signal.waitToTrigger()) { \
 	code \
 }})) \
 
-/*
-thread([this] {
-	while (s.waitToTrigger()) {
-		{
-			num++;
-			printf("n: %i\n", num);
-			fflush(stdout);
-		}
-	}
-})
-*/
+
 class Signal {
 public:
 	Signal() {}
+	~Signal();
 	
-	~Signal() {
-		{
-			unique_lock<mutex> ul(mtx);
-			triggerEnabled = false;
-			running = false;
-			condVar.notify_all();
-
-		}
-		signal.join();
-	}
-
-
-	void trigger() {
-		if (triggerEnabled) {
-			{
-				unique_lock<mutex> ul(mtx);
-				while (!running) {
-					condVar.wait(ul);
-				}
-			}
-
-			trigCount++;
-			condVar.notify_one();
-		}
-	}
-
-
-	void setTriggerEnable() {
+	inline void setTriggerEnable() {
 		triggerEnabled = true;
 	}
-	bool isTriggerEnable() {
+
+	inline bool isTriggerEnable() {
 		return triggerEnabled;
 	}
 
 
-	int getPendingExecutions() {
+	inline int getPendingExecutions() {
 		return trigCount;
 	}
 
-	bool waitToTrigger() {
-		{
-			unique_lock<mutex> ul(mtx);
-			while (trigCount == 0 && running) {
-				condVar.wait(ul);
-			}
-		}
-		
-		if (!running && trigCount == 0) return false;
-
-		trigCount--;
-		return true;
-	}
-
-	void setSignal(thread th) {
-		signal = move(th);
-		triggerEnabled = true;
-		condVar.notify_all();
-	}
+	void trigger();
+	bool waitToTrigger();
+	void setSignal(thread th);
 
 private:
 	thread signal;
